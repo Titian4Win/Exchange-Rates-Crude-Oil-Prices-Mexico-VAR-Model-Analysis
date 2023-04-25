@@ -1,0 +1,2 @@
+# Exchange-Rates-Crude-Oil-Prices-Mexico-VAR-Model-Analysis
+ I explore exchange rates and crude oil prices in Mexico using a VAR model. Despite rising gasoline prices, I find no significant correlation between them. Granger Causality and other methods help measure their impact on the Mexican Peso. Literature review shows exchange rates affect import/export prices and OPEC pricing based on the dollar.
