@@ -1,0 +1,132 @@
+---
+title: "Exchange Rate & Crude Oil Prices"
+output: html_document
+date: "2022-12-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+#install.packages("plm")
+#install.packages("realxl")
+#install.packages("tseries")
+#install.packages("urca")
+#install.packages("AER")
+#install.packages("vars")
+#install.packages("tidyverse")
+#install.packages("stargazer")
+#install.packages("ggfortify")
+#install.packages("vars")
+#install.packages("urca")
+#install.packages("mFilter")
+#install.packages("forecast")
+#install.packages("tsibble")
+#install.packages("fpp2")
+library(plm)
+library(vars)
+library(readxl)
+library(tseries)
+library(urca)
+library(AER)
+library(vars)
+library(tidyverse)
+library(ggfortify)
+library(tseries)
+library(urca)
+library(mFilter)
+library(forecast)
+library(readxl)
+library(tidyverse)
+library(vars)
+library(forecast)
+library(extRemes)
+library(forecast)
+library(vars)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(broom)
+library(kableExtra)
+library(tsibble)
+library(fpp2)
+library(vars)
+library(stargazer)
+library(extRemes)
+library(vars)
+```
+```{r}
+#load dataset
+Mexico <- read_excel("/Users/andrewscpu/Documents/GitHub/Titian4Win.github.io/Titian4Win.github.io/Exchange Rate & Crude Oil Prices/Exchange-Rates-Crude-Oil-Prices-Mexico-VAR-Model-Analysis/RBMXBIS.xls")
+# Graph
+ggplot(data = Mexico) + geom_point(mapping = aes(x = IR10000, y = RBMXBIS))
+attach(Mexico)
+
+Crude<- ts(Mexico$IR10000, start= c(1994,1), frequency = 12)
+Exchange_Rate <- ts(Mexico$RBMXBIS, start = c(1994,1), frequency = 12)
+
+autoplot(Crude)
+autoplot(Exchange_Rate)
+autoplot(cbind(Crude,Exchange_Rate))
+acf(Crude, main = "ACF for Crude Prices")
+pacf(Crude, main = "ACF for Crude Prices")
+acf(Exchange_Rate, main = "ACF for Exchange Rate")
+pacf(Exchange_Rate, main = "ACF for Exchange Rate")
+adf_Crude <- adf.test(Crude)
+adf_Exchange_Rate <- adf.test(Exchange_Rate)
+print(adf_Crude)
+print(adf_Exchange_Rate)
+white_noise<-rnorm(100,0,1)
+plot(white_noise, type='l',xlab=)
+Crude_diff <- diff(Crude)
+plot.ts(Crude_diff, col=4, main='First Order Difference')
+Exchange_Rate_diff <- diff(Exchange_Rate)
+plot.ts(Exchange_Rate_diff, col=4, main='First Order Difference')
+whitenoise_Crude <- arima(Crude_diff)
+whitenoise_Crude
+whitenoise_Exchange <- arima(Exchange_Rate_diff)
+whitenoise_Exchange
+plot.ts(Crude_diff,col=4, main="Random Walk with Drift")
+plot.ts(Exchange_Rate_diff,col=4, main="Random Walk with Drift")
+abline(0, whitenoise_Crude$coef,col=2)
+abline(0, whitenoise_Exchange$coef,col=2)
+adf_Crude2 <- adf.test(Crude_diff)
+adf_Crude2
+adf_Exchange_Rate2 <- adf.test(Exchange_Rate_diff)
+adf_Exchange_Rate2
+#optimallag
+Crude_lag <- VARselect(Crude_diff, lag.max = 3)
+Crude_lag
+Exchange_Rate_lag <- VARselect(Exchange_Rate_diff, lag.max = 3)
+Exchange_Rate_lag
+Mexico.bv <- cbind(Crude_diff, Exchange_Rate_diff)
+#estimate
+estim <- VAR(Mexico.bv, p=2, type = "none")
+summary(estim)
+stargazer(estim[["varresult"]], type='text')
+roots(estim, modulus = TRUE)
+#Granger
+grangery1<- causality(estim, cause = "Crude_diff")
+grangery1$Granger
+grangery2<-causality(estim, cause = "Exchange_Rate_diff")
+grangery2$Granger
+#IRF
+irf1 <- irf(estim, impulse = "Crude_diff", response = "Exchange_Rate_diff", 
+            n.ahead = 20, boot = TRUE, run=200, ci=0.95)
+plot(irf1,ylab = "Crude Oil", main = "Crude response to Exchange rate shock" )
+irf2 <- irf(estim, impulse = "Exchange_Rate_diff", response = "Crude_diff",
+            n.ahead = 20, boot= TRUE, run=200, ci=0.95)
+plot(irf2, ylab = "Crude_diff",
+     main = "Exchange response to Crude Response")
+#variance decompositon
+vd <- fevd(estim, n.ahead = 10)
+plot(vd)
+
+
